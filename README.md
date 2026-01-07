@@ -17,6 +17,8 @@ Kubernetes real (não apenas YAML básico)
 
 Segurança
 
+NOVA ETAPA — AUTORIZAÇÃO GRANULAR
+
 Testes automatizados
 
 Comunicação entre serviços
@@ -198,6 +200,40 @@ REST stateless
 
 Nenhuma sessão em memória
 
+🔹 NOVA ETAPA — AUTORIZAÇÃO GRANULAR
+
+📅 (Inserida após a etapa de segurança)
+
+Objetivo
+
+Garantir que não basta estar autenticado, é preciso ter permissão.
+
+Entregas
+
+JWT contendo:
+
+roles
+
+scopes
+
+Regras no Gateway:
+
+/admin/** → ADMIN
+
+/users/** → USER
+
+Regras nos serviços:
+
+@PreAuthorize
+
+validação de permissões
+
+Avaliação
+
+Token válido ≠ acesso liberado
+
+Autorização consistente em múltiplas camadas
+
 🔹 ETAPA 5 — TESTES AUTOMATIZADOS (OBRIGATÓRIO)
 
 📅 Dias 19 a 23
@@ -236,6 +272,15 @@ Comunicação entre serviços
 Config Server
 
 Banco de dados
+
+🧪 Testes de Autorização (OBRIGATÓRIO)
+Exemplos:
+
+Usuário sem role ADMIN tentando acessar endpoint admin → 403
+
+Token inválido → 401
+
+Token válido + role correta → 200
 
 Ferramentas:
 Spring Boot Test, Testcontainers
