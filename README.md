@@ -438,3 +438,137 @@ Ao final, você terá:
 🔥 NÍVEL DO EXERCÍCIO
 
 📈 Pleno forte → Sênior inicial
+
+## 📊 Avaliação Final do Exercício
+
+### 🔹 Parte 0 — ARQUITEURA ORIENTADA A KUBERNETES (2 pontos)
+
+**Explicação do aluno:**  
+_Descreva como o projeto foi criado (Spring Initializr, Java 17, dependências utilizadas, estrutura inicial do projeto, etc)._
+  Projeto criado com Spring Initializr usando as tecnologias pedidas. Grandes problemas com o Maven pois no prompt de comando do Windows eu tenho o Java 8 e baixei a ultima versao do Maven. Com isso nao consegui executar o comando mvn clean test, a solucao foi suar a interface grafica do Intellij onde o Maven usou o Java 17 configurado apra o projeto. Para finalizar o comando mvn clean test rodou sem erros conforme o definido para a Etapa 1. 
+
+**Nota do aluno:** `2/2`
+
+**Análise do avaliador:**  
+## 📊 Avaliação Final do Exercício
+
+### 🔹 Parte 1 — Projeto base funcional (2 pontos)
+
+**Explicação do aluno:**  
+
+## 📊 Avaliação Final do Exercício
+
+### 🔹 Parte 0 — ARQUITETURA ORIENTADA A KUBERNETES (2 pontos)
+
+**Explicação do aluno:**  
+
+  Visao geral do sistema:
+
+O sistema deve fazer autenticacao e autorizacao de usuarios. Endpoints para entender e usar a arquitetura com microsservicos e Kubernetes,
+ alem de um frontend para entender de maneira mais proxima a realidade dos softwares em ambiente de producao e usados no mercado. 
+
+Responsabilidades dos serviços:
+
+eureka-server: todos os servicos irao se registrar no eureka-server, permitindo que os microservicos 
+se encontrem dinamicamente sem depender de enderecos IP
+
+config-server: as configuracoes ficarao centralizadas no config-server em um repositorio remoto, 
+dessa forma centralizando todos os arquivos de configuracao/propriedades dos microservicos
+
+api-gateway: ponto de entrada para os clientes acessarem os microservicos, serve tambem como 
+load balance para o escalonamento dos microservicos com o Spring
+
+auth-service: servico responsavel por autenticar os usuarios vindo das requisicoes 
+do cliente 
+
+user-service: servico responsavel pelo gerenciamento 
+dos usuario (criacao, exclusao, alteracao dos usuarios)
+
+
+Por que microserviços:
+O uso de microservicos busca a separacao de responsabilidades no nível de negocio e tambem 
+na arquitetura. Facilitando o entendimento das regras de negocio e divisao das mesmas. Os microsservicos podem 
+ser dividos por times por exemplo a medida que o projeto aumenta de tamanho e de dificuldades. 
+Fornece deploy independente de outras partes do sistema, bem como tambem torna mais simplçificada a evolucao do sistema e da 
+    arquitetura como um todo, pois apenas esse servico e afetado por novas features ou correcoes de bugs.
+Como trade-off os microservicos trazem desafios como a orquestracao via Kubernetes, observabilidade e 
+automacao de deploy.
+
+Separacao em dois bancos de dados (auth / user):
+ Cada microservico possui seu proprio banco de dados, seguindo o prinicpio de autonomia dos microservicos. Essa separacao evita
+ acoplametno direto, permite escalabilidade independente e melhora a seguranca ao separar dados sensiveis. 
+ O time de autenticacao pode ser uma equipe mais madura, com amis acessos enquanto o banco de cadastro de usuarios pode ser um pouco mais acessivel por exemplo.
+
+
+Por que Kubernetes:
+Os containers sao muito utilizados no mercado atual, principalmente usando praticas de DevOps, 
+aonde automacao, observabilidade e facilidades para um deploy mais rapido sao essenciais. Neste
+sentido o  Kubernetes vem como um orquestrador dos containers, permitindo escalonar a aplicacao
+de forma rapida, tanto vertical com horizontalmente. Permite o monitoramento das aplicacoes com usao de tecnicas de 
+observabilidade entre outros. Kubernetes e utilizado desde o inicio do projeto como ambiente padrao de execucao, evitando
+diferencas entre ambientes de desenvolvimento e producao.
+
+Diagrama:
+
+                               ┌─────────────────────────┐
+                               │        Kubernetes        │
+                               │         Cluster          │
+                               └────────────┬────────────┘
+                                            │
+                                  Entrada Única (NodePort)
+                                            │
+                                   ┌──────────────────┐
+                                   │   svc-gateway    │
+                                   │   (NodePort)     │
+                                   └─────────┬────────┘
+                                             │
+                                    ┌─────────────────┐
+                                    │   pod-gateway   │
+                                    │                │
+                                    │ ┌────────────┐ │
+                                    │ │ api-gateway│ │
+                                    │ │ Spring GW  │ │
+                                    │ └────────────┘ │
+                                    │      │          │
+                                    │      ▼          │
+                                    │  gateway-config │ (ConfigMap)
+                                    └───────┬─────────┘
+                                            │
+               ┌────────────────────────────┴────────────────────────────┐
+               │                                                           │A
+        ┌───────────────┐                                      ┌───────────────┐
+        │   svc-auth    │                                      │   svc-user    │
+        │  (NodePort)  │                                      │  (NodePort)  │
+        └───────┬──────┘                                      └──────┬────────┘
+                │                                                           │
+      ┌──────────────────┐                                     ┌──────────────────┐
+      │    pod-auth      │                                     │    pod-user      │
+      │                 │                                     │                 │
+      │ ┌─────────────┐ │                                     │ ┌─────────────┐ │
+      │ │ auth-service│ │                                     │ │ user-service│ │
+      │ │ Spring Boot │ │                                     │ │ Spring Boot │ │
+      │ └──────┬──────┘ │                                     │ └──────┬──────┘ │
+      │        │         │                                     │        │         │
+      │ ┌─────────────┐ │                                     │ ┌─────────────┐ │
+      │ │  auth-db    │ │                                     │ │  user-db    │ │
+      │ │ credentials │ │                                     │ │ user data  │ │
+      │ └─────────────┘ │                                     │ └─────────────┘ │
+      │        │         │                                     │        │         │
+      │   auth-config   │ (ConfigMap)                          │   user-config   │ (ConfigMap)
+      │   auth-secrets  │ (Secret)                             │   user-secrets  │ (Secret)
+      └──────────────────┘                                     └──────────────────┘
+
+
+
+
+**Nota do aluno:** `10/10`
+
+**Análise do avaliador:**  
+O projeto base foi criado corretamente utilizando o Spring Initializr, com Java 17 e estrutura padrão do Spring Boot. Apesar dos problemas iniciais relacionados ao Maven e à diferença de versões do Java (Java 8 no sistema e Java 17 no projeto), o aluno demonstrou boa capacidade de diagnóstico e resolução de problemas de ambiente. A execução do comando `mvn clean test` ocorreu com sucesso utilizando o Maven configurado pelo IntelliJ, validando que o projeto compila e que o contexto Spring sobe corretamente. A etapa atende completamente aos requisitos propostos.
+
+---
+
+
+---
+
+
