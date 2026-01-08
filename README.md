@@ -472,7 +472,7 @@ Por que microserviços:
 O uso de microservicos busca a separacao de responsabilidades no nível de negocio e tambem 
 na arquitetura. Facilitando o entendimento das regras de negocio e divisao das mesmas. Os microsservicos podem 
 ser dividos por times por exemplo a medida que o projeto aumenta de tamanho e de dificuldades. 
-Fornece deploy independente de outras partes do sistema, bem como tambem torna mais simplçificada a evolucao do sistema e da 
+Fornece deploy independente de outras partes do sistema, bem como tambem torna mais simplificada a evolucao do sistema e da 
     arquitetura como um todo, pois apenas esse servico e afetado por novas features ou correcoes de bugs.
 Como trade-off os microservicos trazem desafios como a orquestracao via Kubernetes, observabilidade e 
 automacao de deploy.
@@ -480,14 +480,14 @@ automacao de deploy.
 Separacao em dois bancos de dados (auth / user):
  Cada microservico possui seu proprio banco de dados, seguindo o prinicpio de autonomia dos microservicos. Essa separacao evita
  acoplametno direto, permite escalabilidade independente e melhora a seguranca ao separar dados sensiveis. 
- O time de autenticacao pode ser uma equipe mais madura, com amis acessos enquanto o banco de cadastro de usuarios pode ser um pouco mais acessivel por exemplo.
+ O time de autenticacao pode ser uma equipe mais madura, com menos restricoes de acesso enquanto o banco de cadastro de usuarios pode ser um pouco mais acessivel por exemplo.
 
 
 Por que Kubernetes:
 Os containers sao muito utilizados no mercado atual, principalmente usando praticas de DevOps, 
 aonde automacao, observabilidade e facilidades para um deploy mais rapido sao essenciais. Neste
 sentido o  Kubernetes vem como um orquestrador dos containers, permitindo escalonar a aplicacao
-de forma rapida, tanto vertical com horizontalmente. Permite o monitoramento das aplicacoes com usao de tecnicas de 
+de forma rapida, tanto vertical com horizontalmente. Permite o monitoramento das aplicacoes com o uso de tecnicas de 
 observabilidade entre outros. Kubernetes e utilizado desde o inicio do projeto como ambiente padrao de execucao, evitando
 diferencas entre ambientes de desenvolvimento e producao.
 
