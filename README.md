@@ -441,24 +441,7 @@ Ao final, você terá:
 
 ## 📊 Avaliação Final do Exercício
 
-### 🔹 Parte 0 — ARQUITEURA ORIENTADA A KUBERNETES (2 pontos)
-
-**Explicação do aluno:**  
-_Descreva como o projeto foi criado (Spring Initializr, Java 17, dependências utilizadas, estrutura inicial do projeto, etc)._
-  Projeto criado com Spring Initializr usando as tecnologias pedidas. Grandes problemas com o Maven pois no prompt de comando do Windows eu tenho o Java 8 e baixei a ultima versao do Maven. Com isso nao consegui executar o comando mvn clean test, a solucao foi suar a interface grafica do Intellij onde o Maven usou o Java 17 configurado apra o projeto. Para finalizar o comando mvn clean test rodou sem erros conforme o definido para a Etapa 1. 
-
-**Nota do aluno:** `2/2`
-
-**Análise do avaliador:**  
-## 📊 Avaliação Final do Exercício
-
-### 🔹 Parte 1 — Projeto base funcional (2 pontos)
-
-**Explicação do aluno:**  
-
-## 📊 Avaliação Final do Exercício
-
-### 🔹 Parte 0 — ARQUITETURA ORIENTADA A KUBERNETES (2 pontos)
+### 🔹 Parte 0 — ARQUITETURA ORIENTADA A KUBERNETES 
 
 **Explicação do aluno:**  
 
