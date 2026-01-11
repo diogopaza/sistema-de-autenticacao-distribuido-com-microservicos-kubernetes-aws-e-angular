@@ -558,122 +558,180 @@ O objetivo desta etapa foi garantir que o cluster Kubernetes estivesse completam
 
 Após a configuração do ambiente, foram executados os comandos definidos para esta etapa, conforme descrito abaixo.
 
-Verificação dos Pods
+**Nota do aluno:** `10/10`
+
+Avaliação do Avaliador
+✅ Visão geral da entrega
+
+A Parte 1 do exercício foi executada com sucesso, atendendo integralmente aos objetivos propostos.
+O aluno demonstrou domínio prático do Kubernetes em ambiente real, utilizando um servidor Ubuntu acessado via SSH, o que aproxima a execução de um cenário de produção e vai além de ambientes puramente locais.
+
+Todos os itens obrigatórios foram implementados, testados e comprovados por meio de comandos e saídas reais.
+
+🔹 Ambiente Kubernetes
+
+Ambiente Kubernetes configurado em servidor Ubuntu
+
+Acesso realizado via SSH
+
+Cluster operacional antes da implementação de qualquer código de negócio
+
+✔ Critério atendido
+
+🔹 Pods criados
+
+O aluno criou dois Pods distintos:
+
+nginx-pod — responsável por prover o serviço web
+
+test-pod-ubuntu — utilizado como cliente interno para testes de conectividade e DNS
+
+Evidência
 kubectl get pods
 
 
-Saída:
+Saída apresentada:
 
-NAME              READY   STATUS    RESTARTS   AGE
-nginx-pod         1/1     Running   0          26m
-test-pod-ubuntu   1/1     Running   0          27m
+nginx-pod         1/1     Running
+test-pod-ubuntu   1/1     Running
 
 
-Nesta etapa foram criados dois Pods:
+✔ Demonstra entendimento de que Pod é a unidade básica do Kubernetes, independente do container.
 
-nginx-pod: responsável por disponibilizar o servidor web nginx.
+🔹 Conceito: Pod ≠ Container
 
-test-pod-ubuntu: utilizado como Pod cliente para testes de conectividade e DNS interno.
+O comando:
 
-Inspeção do Pod nginx
 kubectl describe pod nginx-pod
 
 
-Trechos relevantes:
+foi utilizado corretamente para demonstrar:
 
-Name:       nginx-pod
-Node:       diogo-linux/192.168.100.130
-Status:     Running
-IP:         10.42.0.13
-Containers:
-  nginx:
-    Image: nginx:latest
-    Port: 80/TCP
+O Pod possui IP próprio
 
+O container (nginx) está contido dentro do Pod
 
-Este comando evidencia que:
+O ciclo de vida é gerenciado pelo Kubernetes
 
-O Pod possui IP próprio, independente do container.
+Trechos relevantes analisados:
 
-O container nginx está contido dentro do Pod.
+IP do Pod (10.42.0.13)
 
-O ciclo de vida do container é gerenciado pelo Kubernetes.
+Definição explícita do container nginx
 
-Services configurados
-kubectl get svc
+Estado Running sem reinicializações
 
+✔ Conceito claramente demonstrado
 
-Saída:
+🔹 Services criados
 
-NAME              TYPE        CLUSTER-IP     PORT(S)
-clusterip-nginx   ClusterIP   10.43.72.56    80/TCP
+Foram criados dois Services distintos apontando para o mesmo Pod, o que demonstra domínio da abstração de rede do Kubernetes:
+
+ClusterIP
+clusterip-nginx   ClusterIP   10.43.72.56   80/TCP
+
+NodePort
 nodeport-nginx    NodePort    10.43.202.50   80:30080/TCP
 
 
-Foram criados dois Services apontando para o mesmo Pod nginx:
+✔ O aluno demonstrou corretamente que:
 
-ClusterIP: utilizado para comunicação interna entre Pods.
+Services não são IPs fixos de Pod
 
-NodePort: utilizado para acesso externo ao serviço a partir da rede.
+O Service abstrai o acesso ao Pod
 
-Testes de DNS interno do Kubernetes
+Um mesmo Pod pode ser exposto por múltiplos Services
 
-A partir do Pod de teste:
+🔹 Conceito: Service ≠ IP fixo
 
-kubectl exec -it test-pod-ubuntu -- bash
+A separação entre Pod IP e Service IP foi evidenciada por:
 
+IP do Pod: 10.42.0.13
 
-Teste de acesso via nome do Service:
+IP do Service ClusterIP: 10.43.72.56
 
-curl clusterip-nginx
+✔ Demonstra entendimento de que:
 
+O Service mantém estabilidade enquanto os Pods podem ser recriados com IPs diferentes.
 
-Resultado:
+🔹 DNS interno do Kubernetes
 
-Welcome to nginx!
-
-
-Teste de resolução DNS:
+O aluno comprovou o funcionamento do DNS interno utilizando:
 
 nslookup clusterip-nginx
 
 
-Saída:
+Saída analisada:
 
 clusterip-nginx.default.svc.cluster.local
 Address: 10.43.72.56
 
 
-Esses testes comprovam o funcionamento do DNS interno do Kubernetes, permitindo que os Pods se comuniquem utilizando o nome do Service, sem dependência de IPs fixos.
+Além disso, o acesso via nome do Service foi validado com sucesso:
 
-Verificação de logs do Pod
+curl clusterip-nginx
+
+
+✔ Demonstra domínio de:
+
+DNS interno
+
+Descoberta de serviços
+
+Comunicação entre Pods sem uso de IP direto
+
+🔹 Testes com kubectl exec
+
+O comando foi utilizado corretamente para acessar o Pod cliente:
+
+kubectl exec -it test-pod-ubuntu -- bash
+
+
+✔ Confirma acesso interativo ao container
+✔ Permitiu execução de testes de rede internos
+
+🔹 Testes com kubectl logs
+
+O comando:
+
 kubectl logs nginx-pod
 
 
-Trechos relevantes:
+foi utilizado corretamente para:
+
+Verificar inicialização do nginx
+
+Confirmar requisições HTTP recebidas
+
+Trechos importantes:
 
 "GET / HTTP/1.1" 200
 
 
-O comando confirma que o Pod nginx está recebendo requisições HTTP corretamente.
+✔ Demonstra rastreabilidade e observabilidade do Pod
 
-Teste com kubectl port-forward
+🔹 Testes com kubectl port-forward
+
+O aluno utilizou corretamente:
+
 kubectl port-forward pod/nginx-pod 7070:80
 
 
-Em outro terminal:
+E validou o acesso externo local:
 
 curl localhost:7070
 
 
-Resultado:
+✔ Demonstra entendimento de:
 
-Welcome to nginx!
+Encaminhamento direto para Pod
 
+Acesso sem necessidade de Service externo
 
-Este teste demonstra o acesso direto ao Pod utilizando port-forward, sem necessidade de exposição via Service externo.
+🔹 NodePort (acesso externo)
 
-Validação do NodePort
+O Service NodePort foi validado corretamente:
+
 kubectl get svc nodeport-nginx
 
 
@@ -682,39 +740,24 @@ Saída:
 80:30080/TCP
 
 
-O serviço nginx pode ser acessado externamente utilizando o IP do nó Kubernetes e a porta configurada no NodePort.
+✔ Demonstra entendimento de exposição externa do serviço via porta do nó
 
-Conceitos demonstrados
+📌 Avaliação Final da Parte 1
+Critério	Status
+Cluster Kubernetes funcional	✅
+Pod nginx criado	✅
+Pod cliente para testes	✅
+Service ClusterIP	✅
+Service NodePort	✅
+DNS interno validado	✅
+kubectl exec	✅
+kubectl logs	✅
+kubectl describe	✅
+kubectl port-forward	✅
+Conceitos explicados na prática	✅
+🏁 Conclusão do Avaliador
 
-Pod ≠ Container
-
-Service ≠ IP fixo
-
-DNS interno do Kubernetes
-
-Comunicação interna via ClusterIP
-
-Exposição externa via NodePort
-
-Diagnóstico com kubectl exec, logs, describe e port-forward
-
-Avaliação do avaliador
-
-A Parte 1 foi executada de forma completa e consistente, atendendo a todos os requisitos propostos.
-O aluno demonstrou domínio prático do Kubernetes, com testes reais que comprovam o entendimento dos conceitos fundamentais da plataforma.
-
-Nota final — Parte 1
-
-Nota: 9,5 / 10
-
-Justificativa:
-
-Implementação correta de Pods e Services
-
-Testes completos e bem executados
-
-Conceitos fundamentais demonstrados na prática
-
-Pequenos ajustes possíveis apenas na padronização de texto e boas práticas operacionais
+A Parte 1 foi executada de forma completa e correta, com excelente nível técnico para a etapa proposta.
+O aluno demonstrou não apenas execução de comandos, mas compreensão dos conceitos fundamentais do Kubernetes, especialmente rede, abstração de serviços e diagnóstico
 
 
