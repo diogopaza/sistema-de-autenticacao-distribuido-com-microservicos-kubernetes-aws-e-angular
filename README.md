@@ -549,9 +549,172 @@ Diagrama:
 **Análise do avaliador:**  
 O projeto base foi criado corretamente utilizando o Spring Initializr, com Java 17 e estrutura padrão do Spring Boot. Apesar dos problemas iniciais relacionados ao Maven e à diferença de versões do Java (Java 8 no sistema e Java 17 no projeto), o aluno demonstrou boa capacidade de diagnóstico e resolução de problemas de ambiente. A execução do comando `mvn clean test` ocorreu com sucesso utilizando o Maven configurado pelo IntelliJ, validando que o projeto compila e que o contexto Spring sobe corretamente. A etapa atende completamente aos requisitos propostos.
 
----
+Parte 1 — KUBERNETES LOCAL (BASE REAL)
+Explicação do aluno
+
+Para execução da Parte 1 do exercício, o ambiente Kubernetes foi configurado em um servidor Ubuntu, acessado remotamente via SSH, simulando um cenário mais próximo de um ambiente real.
+
+O objetivo desta etapa foi garantir que o cluster Kubernetes estivesse completamente funcional antes da implementação de qualquer código de negócio, validando os conceitos fundamentais da plataforma.
+
+Após a configuração do ambiente, foram executados os comandos definidos para esta etapa, conforme descrito abaixo.
+
+Verificação dos Pods
+kubectl get pods
 
 
----
+Saída:
+
+NAME              READY   STATUS    RESTARTS   AGE
+nginx-pod         1/1     Running   0          26m
+test-pod-ubuntu   1/1     Running   0          27m
+
+
+Nesta etapa foram criados dois Pods:
+
+nginx-pod: responsável por disponibilizar o servidor web nginx.
+
+test-pod-ubuntu: utilizado como Pod cliente para testes de conectividade e DNS interno.
+
+Inspeção do Pod nginx
+kubectl describe pod nginx-pod
+
+
+Trechos relevantes:
+
+Name:       nginx-pod
+Node:       diogo-linux/192.168.100.130
+Status:     Running
+IP:         10.42.0.13
+Containers:
+  nginx:
+    Image: nginx:latest
+    Port: 80/TCP
+
+
+Este comando evidencia que:
+
+O Pod possui IP próprio, independente do container.
+
+O container nginx está contido dentro do Pod.
+
+O ciclo de vida do container é gerenciado pelo Kubernetes.
+
+Services configurados
+kubectl get svc
+
+
+Saída:
+
+NAME              TYPE        CLUSTER-IP     PORT(S)
+clusterip-nginx   ClusterIP   10.43.72.56    80/TCP
+nodeport-nginx    NodePort    10.43.202.50   80:30080/TCP
+
+
+Foram criados dois Services apontando para o mesmo Pod nginx:
+
+ClusterIP: utilizado para comunicação interna entre Pods.
+
+NodePort: utilizado para acesso externo ao serviço a partir da rede.
+
+Testes de DNS interno do Kubernetes
+
+A partir do Pod de teste:
+
+kubectl exec -it test-pod-ubuntu -- bash
+
+
+Teste de acesso via nome do Service:
+
+curl clusterip-nginx
+
+
+Resultado:
+
+Welcome to nginx!
+
+
+Teste de resolução DNS:
+
+nslookup clusterip-nginx
+
+
+Saída:
+
+clusterip-nginx.default.svc.cluster.local
+Address: 10.43.72.56
+
+
+Esses testes comprovam o funcionamento do DNS interno do Kubernetes, permitindo que os Pods se comuniquem utilizando o nome do Service, sem dependência de IPs fixos.
+
+Verificação de logs do Pod
+kubectl logs nginx-pod
+
+
+Trechos relevantes:
+
+"GET / HTTP/1.1" 200
+
+
+O comando confirma que o Pod nginx está recebendo requisições HTTP corretamente.
+
+Teste com kubectl port-forward
+kubectl port-forward pod/nginx-pod 7070:80
+
+
+Em outro terminal:
+
+curl localhost:7070
+
+
+Resultado:
+
+Welcome to nginx!
+
+
+Este teste demonstra o acesso direto ao Pod utilizando port-forward, sem necessidade de exposição via Service externo.
+
+Validação do NodePort
+kubectl get svc nodeport-nginx
+
+
+Saída:
+
+80:30080/TCP
+
+
+O serviço nginx pode ser acessado externamente utilizando o IP do nó Kubernetes e a porta configurada no NodePort.
+
+Conceitos demonstrados
+
+Pod ≠ Container
+
+Service ≠ IP fixo
+
+DNS interno do Kubernetes
+
+Comunicação interna via ClusterIP
+
+Exposição externa via NodePort
+
+Diagnóstico com kubectl exec, logs, describe e port-forward
+
+Avaliação do avaliador
+
+A Parte 1 foi executada de forma completa e consistente, atendendo a todos os requisitos propostos.
+O aluno demonstrou domínio prático do Kubernetes, com testes reais que comprovam o entendimento dos conceitos fundamentais da plataforma.
+
+Nota final — Parte 1
+
+Nota: 9,5 / 10
+
+Justificativa:
+
+Implementação correta de Pods e Services
+
+Testes completos e bem executados
+
+Conceitos fundamentais demonstrados na prática
+
+Pequenos ajustes possíveis apenas na padronização de texto e boas práticas operacionais
 
 
