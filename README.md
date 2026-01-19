@@ -118,75 +118,137 @@ Service ≠ IP fixo
 
 DNS interno do Kubernetes
 
-🔹 ETAPA 2 — MICROSSERVIÇOS BASE (SPRING)
+📦 ETAPA 2 — MICROSSERVIÇOS BASE (SPRING)
 
 📅 Dias 8 a 11
 
-Serviços obrigatórios
+🎯 Objetivo
 
-eureka-server
+Ter a arquitetura de microsserviços funcional, rodando exclusivamente dentro do Kubernetes, sem foco ainda em regras de negócio complexas.
 
-config-server
+⚠️ Regra-chave de avaliação
+Se roda fora do Kubernetes, mas não roda dentro, não está pronto.
 
-api-gateway
+🔹 Serviços obrigatórios
+Serviço	Responsabilidade
+eureka-server	Service Discovery
+config-server	Configuração centralizada
+api-gateway	Ponto único de entrada
+auth-service	Autenticação
+user-service	Gerenciamento de usuários
+🔹 Entregas obrigatórias (para cada serviço)
 
-auth-service
-
-user-service
-
-Entregas
-
-Cada serviço com:
+Cada serviço deve conter:
 
 Spring Boot
 
-Dockerfile
+Porta configurável via variável de ambiente
 
-Health check (/actuator/health)
+Endpoint:
 
-Todos os serviços rodando dentro do Kubernetes
+/actuator/health
 
-Avaliação
 
-Se algo roda fora do Kubernetes mas não dentro, não está pronto.
+Dockerfile funcional
 
-🔹 ETAPA 3 — CONFIGURAÇÃO CENTRALIZADA (SPRING CLOUD + K8S)
+Deployment Kubernetes
+
+Service Kubernetes (ClusterIP)
+
+🔹 Testes esperados
+kubectl get pods
+kubectl get svc
+kubectl logs <pod>
+kubectl exec <pod>
+curl http://<service>:<port>/actuator/health
+
+
+✔ Todos os serviços Running
+✔ Comunicação via DNS interno do Kubernetes
+
+🔹 Avaliação
+
+Arquitetura correta
+
+Serviços desacoplados
+
+Nada rodando fora do cluster
+
+Gateway chamando serviços via nome DNS
+
+📦 ETAPA 3 — CONFIGURAÇÃO CENTRALIZADA
+
+(Spring Cloud Config + Kubernetes)
 
 📅 Dias 12 a 14
 
-Entregas
+🎯 Objetivo
 
+Separar código de configuração, seguindo boas práticas de microsserviços.
+
+🔹 Entregas obrigatórias
 Spring Cloud Config Server
 
 Configurações versionadas em Git
 
-ConfigMaps:
+Perfis (dev, k8s, prod)
 
-URLs
+ConfigMaps (Kubernetes)
 
-perfis
+Usados para:
 
-Secrets:
+URLs de serviços
 
-senhas
+Portas
 
-chaves JWT
+Perfis ativos
 
-Conceitos avaliados
+Configurações não sensíveis
+
+Exemplo:
+
+SPRING_PROFILES_ACTIVE=k8s
+EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+
+Secrets (Kubernetes)
+
+Usados para:
+
+Senhas
+
+Tokens
+
+Chaves JWT
+
+Credenciais de banco
+
+❗ Nenhum segredo no application.yml
+
+🔹 Conceitos avaliados
 
 Separação entre código e configuração
 
-Segurança de informações sensíveis
+Versionamento de config
 
-🔹 ETAPA 4 — SEGURANÇA (SPRING SECURITY + JWT)
+Segurança básica
+
+Uso correto de ConfigMap vs Secret
+
+📦 ETAPA 4 — SEGURANÇA
+
+(Spring Security + JWT)
 
 📅 Dias 15 a 18
 
-Entregas
+🎯 Objetivo
 
-Login funcional
+Implementar autenticação moderna e stateless.
 
-JWT válido
+🔹 Entregas obrigatórias
+
+Login funcional (/auth/login)
+
+JWT válido retornado
 
 Gateway validando token
 
@@ -194,45 +256,110 @@ Serviços protegidos
 
 Secrets injetados via Kubernetes
 
-Requisitos
+🔹 Requisitos técnicos
 
 REST stateless
 
 Nenhuma sessão em memória
 
-🔹 NOVA ETAPA — AUTORIZAÇÃO GRANULAR
+Token passado via:
 
-📅 (Inserida após a etapa de segurança)
+Authorization: Bearer <token>
 
-Objetivo
+🔹 Avaliação
 
-Garantir que não basta estar autenticado, é preciso ter permissão.
+✔ Token inválido → acesso negado
+✔ Token válido → acesso permitido
 
-Entregas
+📦 NOVA ETAPA — AUTORIZAÇÃO GRANULAR
 
+(Após Segurança)
+
+📅 Dias 19 a 20
+
+🎯 Objetivo
+
+Garantir que autenticação ≠ autorização.
+
+🔹 Entregas obrigatórias
 JWT contendo:
 
 roles
 
 scopes
 
-Regras no Gateway:
+Exemplo:
 
+{
+  "sub": "diogo",
+  "roles": ["ADMIN"],
+  "scopes": ["users.read", "users.write"]
+}
+
+Regras no Gateway
 /admin/** → ADMIN
-
 /users/** → USER
 
-Regras nos serviços:
+Regras nos serviços
+@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('users.read')")
 
-@PreAuthorize
-
-validação de permissões
-
-Avaliação
+🔹 Avaliação
 
 Token válido ≠ acesso liberado
 
-Autorização consistente em múltiplas camadas
+Autorização consistente:
+
+Gateway
+
+Serviço
+
+🗄️ ETAPA EXTRA (AVANÇADA) — FLYWAY (VERSIONAMENTO DE BANCO)
+
+📅 Inserida entre ETAPA 3 e ETAPA 4
+
+👉 Essa é a melhor etapa para incluir Flyway, porque:
+
+Configuração já está centralizada
+
+Secrets já existem
+
+Segurança ainda não bloqueia fluxo
+
+🎯 Objetivo
+
+Garantir versionamento e controle do schema do banco, alinhado a microsserviços.
+
+🔹 Entregas obrigatórias
+Flyway configurado em:
+
+auth-service
+
+user-service
+
+Scripts de migração
+db/migration/
+V1__create_users_table.sql
+V2__add_roles_table.sql
+V3__add_user_roles.sql
+
+Banco rodando no Kubernetes
+
+PostgreSQL ou MySQL
+
+Credenciais via Secrets
+
+URL via ConfigMap
+
+🔹 Avaliação (nível avançado)
+
+Schema criado automaticamente
+
+Migrações idempotentes
+
+Rollout sem perda de dados
+
+Flyway executando ao subir o Pod
 
 🔹 ETAPA 5 — TESTES AUTOMATIZADOS (OBRIGATÓRIO)
 
