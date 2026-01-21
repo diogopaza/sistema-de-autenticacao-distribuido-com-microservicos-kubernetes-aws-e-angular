@@ -1,9 +1,91 @@
 Sistema de Autenticação Distribuído com Microserviços, Kubernetes, AWS e Angular
+🎯 Objetivo do Projeto
 
-🎯 Objetivo geral
-Projetar, desenvolver e operar um sistema de autenticação seguro e escalável, utilizando microserviços, Kubernetes como base da arquitetura, testes automatizados, CI/CD e deploy real em AWS (EKS).
+Este projeto tem como objetivo projetar, implementar e operar um sistema de autenticação e autorização distribuído, utilizando arquitetura de microserviços executando nativamente em Kubernetes, com foco em segurança, escalabilidade, resiliência e práticas reais de produção.
 
-O foco não é apenas funcionar, mas demonstrar maturidade técnica, decisões arquiteturais e boas práticas de produção.
+Mais do que entregar um sistema funcional, este exercício foi concebido para simular um cenário real de mercado, no qual decisões arquiteturais, trade-offs técnicos e maturidade na operação da aplicação são tão importantes quanto o código em si.
+
+O sistema contempla desde a concepção da arquitetura, passando pela execução prática em Kubernetes desde o primeiro dia, até deploy real em AWS (EKS), testes automatizados, CI/CD, observabilidade e integração com frontend.
+
+🧠 Propósito do Exercício
+
+Este não é um projeto de “hello world”, nem um CRUD simples.
+
+O propósito é demonstrar, na prática:
+
+Como pensar aplicações cloud-native desde a arquitetura
+
+Como projetar microserviços independentes, escaláveis e seguros
+
+Como usar o Kubernetes como plataforma, e não apenas como um repositório de YAML
+
+Como separar corretamente responsabilidades, configuração e segredos
+
+Como lidar com segurança moderna (JWT, autorização granular)
+
+Como preparar o sistema para alto volume transacional
+
+Como operar tudo isso em um ambiente próximo ao real (AWS)
+
+Cada etapa do projeto foi pensada para forçar decisões técnicas conscientes, semelhantes às enfrentadas no dia a dia de times de engenharia em produção.
+
+🏗️ Visão Geral da Solução
+
+A solução consiste em um ecossistema de microserviços, incluindo:
+
+Serviços de autenticação e gerenciamento de usuários
+
+Gateway como ponto único de entrada
+
+Descoberta de serviços e configuração centralizada
+
+Comunicação síncrona e assíncrona entre serviços
+
+Persistência isolada por serviço
+
+Frontend Angular consumindo a API via Gateway
+
+Todo o sistema é executado exclusivamente dentro de Kubernetes, desde os primeiros testes até o deploy final em AWS EKS, garantindo consistência entre ambientes e eliminando o clássico “funciona na minha máquina”.
+
+🚀 Foco Principal
+
+O foco deste projeto está em:
+
+Arquitetura distribuída
+
+Execução real em Kubernetes
+
+Segurança e autorização
+
+Escalabilidade e resiliência
+
+Testes automatizados
+
+Observabilidade
+
+Cloud (AWS)
+
+Boas práticas de produção
+
+O código é importante — mas a forma como o sistema é projetado, testado, escalado e operado é o verdadeiro objeto de avaliação.
+
+📌 Resultado Esperado
+
+Ao final do exercício, o projeto deve representar um sistema:
+
+Executável em Kubernetes desde o início
+
+Seguro, stateless e escalável
+
+Preparado para falhas e alto volume de requisições
+
+Automatizado via CI/CD
+
+Implantado em ambiente cloud real
+
+Documentado com clareza sobre decisões técnicas
+
+Este exercício se posiciona como um projeto de nível Pleno forte a Sênior inicial, alinhado com práticas exigidas no mercado atual.
 
 🧠 PERFIL AVALIADO
 
@@ -175,6 +257,116 @@ Serviços desacoplados
 Nada rodando fora do cluster
 
 Gateway chamando serviços via nome DNS
+
+🔹 NOVA ETAPA (DIFERENCIAL) — MICRONAUT (SEM SUBSTITUIR SPRING)
+
+📍 Onde entra:
+➡️ Após ETAPA 2 — MICROSSERVIÇOS BASE
+➡️ Antes de Segurança
+
+💡 Importante:
+
+Não substitui Spring
+
+Não reescreve tudo
+
+Serve para comparação arquitetural + maturidade técnica
+
+🎯 Objetivo da etapa Micronaut
+
+Demonstrar:
+
+Conhecimento de framework alternativo
+
+Entendimento de build-time DI
+
+Diferença real entre Spring x Micronaut em Kubernetes
+
+🔹 O que será feito (escopo enxuto)
+
+Criar um novo microserviço auxiliar, por exemplo:
+
+audit-service (Micronaut)
+
+Responsabilidade:
+
+Receber eventos (ex: login, criação de usuário)
+
+Persistir logs/auditoria
+
+NÃO participa da autenticação diretamente
+
+👉 Isso evita mexer no fluxo crítico.
+
+🔹 Implementação Micronaut (prática)
+1️⃣ Criar projeto Micronaut
+mn create-app audit-service \
+  --lang=java \
+  --build=maven
+
+2️⃣ Endpoint simples
+@Controller("/audit")
+public class AuditController {
+
+    @Post
+    public HttpResponse<?> log(@Body AuditEvent event) {
+        return HttpResponse.ok();
+    }
+}
+
+3️⃣ Dockerfile
+FROM eclipse-temurin:17-jre
+COPY target/audit-service.jar app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
+
+4️⃣ Kubernetes
+
+Deployment
+
+Service (ClusterIP)
+
+Porta via env
+
+env:
+- name: MICRONAUT_SERVER_PORT
+  value: "8080"
+
+🔹 Integração com Spring
+
+No auth-service ou user-service:
+
+restTemplate.postForEntity(
+  "http://audit-service/audit",
+  payload,
+  Void.class
+);
+
+
+👉 Via DNS interno Kubernetes, exatamente como os outros.
+
+🔹 Testes (Micronaut)
+Teste unitário
+@MicronautTest
+class AuditControllerTest {
+
+    @Test
+    void shouldAcceptAuditEvent() {
+        // assert status 200
+    }
+}
+
+Teste em Kubernetes
+kubectl get pods
+kubectl logs audit-service
+kubectl exec test-pod -- curl http://audit-service/audit
+
+🔹 Avaliação (Micronaut)
+
+✔ Serviço Micronaut rodando no Kubernetes
+✔ Comunicação Spring → Micronaut
+✔ Justificativa clara no README:
+
+Micronaut foi utilizado para demonstrar alternativa cloud-native com injeção de dependência em tempo de compilação, reduzindo consumo de memória e tempo de startup, especialmente relevante para workloads escaláveis em Kubernetes.
 
 📦 ETAPA 3 — CONFIGURAÇÃO CENTRALIZADA
 
@@ -445,6 +637,99 @@ Desired State
 Self-healing
 
 Escalonamento horizontal
+
+🔥 NOVA ETAPA (DIFERENCIAL AVANÇADO) — ALTO VOLUME TRANSACIONAL
+
+📍 Onde entra:
+➡️ Após ETAPA 6 — Kubernetes Intermediário
+➡️ Antes de AWS
+
+🎯 Objetivo
+
+Demonstrar que o sistema:
+
+Suporta alta concorrência
+
+Escala corretamente
+
+Mantém consistência
+
+Não quebra sob carga
+
+🔹 O que será avaliado (bem objetivo)
+🔸 1. Stateless real
+
+Nenhuma sessão em memória
+
+JWT 100%
+
+✔ Já está alinhado com seu projeto
+
+🔸 2. Banco preparado para carga
+
+Configurações no Spring:
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+🔸 3. Teste de carga REAL
+
+Usar k6 (simples e profissional)
+
+import http from 'k6/http';
+
+export let options = {
+  vus: 100,
+  duration: '30s',
+};
+
+export default function () {
+  http.get('http://gateway/auth/health');
+}
+
+
+Rodar:
+
+k6 run load-test.js
+
+🔹 Teste com Kubernetes (obrigatório)
+Escalonar serviço
+kubectl scale deployment auth-service --replicas=3
+
+Validar:
+kubectl get pods
+kubectl top pods
+
+
+✔ Requests distribuídos
+✔ Nenhum erro 5xx
+✔ Respostas < timeout
+
+🔹 Teste de falha (self-healing)
+kubectl delete pod auth-service-xxxx
+
+
+✔ Novo Pod sobe
+✔ Sistema continua respondendo
+✔ Gateway redireciona corretamente
+
+🔹 Métrica mínima exigida
+
+No README:
+
+Cenário	Resultado
+100 req/s	OK
+Pod morto	Auto-recuperação
+3 réplicas	Load distribuído
+🔹 Avaliação (Alto Volume)
+
+✔ Entendimento de concorrência
+✔ Escalonamento horizontal real
+✔ Testes práticos documentados
+✔ Kubernetes usado como plataforma, não só YAML
 
 🔹 ETAPA 7 — COMUNICAÇÃO ASSÍNCRONA
 
