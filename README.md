@@ -1173,3 +1173,10 @@ A Parte 1 foi executada de forma completa e correta, com excelente nível técni
 O aluno demonstrou não apenas execução de comandos, mas compreensão dos conceitos fundamentais do Kubernetes, especialmente rede, abstração de serviços e diagnóstico
 
 
+Parte 2 —
+
+Configuracao do Spring Boot Actuator: o Spring Boot Actuator e o modulo de observabilidade e operacao do Spring Boot.
+Este fornece endpoints operacionais como /actuator/health que responde com UP/DOWN e tambem possue endpoints de metricas
+- /actuator/metrics - que traz informacoes como quantas requisições, tempo médio, erros, Status HTTP.
+Tambem possue o endpoint /actuator/info que tras informacoes gerais como versão, nome, build.
+
