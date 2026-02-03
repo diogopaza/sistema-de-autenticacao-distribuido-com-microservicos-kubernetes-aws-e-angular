@@ -506,6 +506,101 @@ Gateway
 
 Serviço
 
+🆕 NOVA SUBSEÇÃO — AUDITORIA DE IP E USER-AGENT (NÍVEL SÊNIOR)
+🎯 Objetivo
+
+Demonstrar maturidade em segurança, auditoria e rastreabilidade, garantindo que cada requisição autenticada possa ser rastreada até sua origem, algo essencial em ambientes corporativos, financeiros e regulados.
+
+🔹 O que será implementado
+
+Para todas as requisições que passam pelo Gateway, o sistema irá:
+
+Capturar o IP de origem do cliente
+
+Capturar o User-Agent
+
+Associar essas informações ao usuário autenticado (JWT)
+
+Tornar essas informações disponíveis para:
+
+logs
+
+auditoria
+
+troubleshooting
+
+investigações de segurança
+
+🔹 Pontos técnicos avaliados
+1️⃣ Captura correta do IP real do cliente
+
+Em ambientes com Gateway, Load Balancer e Kubernetes, o IP real não está em request.getRemoteAddr().
+
+O sistema considera corretamente os headers padrão de produção:
+
+X-Forwarded-For
+
+X-Real-IP
+
+Com fallback controlado.
+
+📌 Decisão técnica documentada:
+O IP é extraído prioritariamente de X-Forwarded-For, considerando o primeiro IP da cadeia, conforme boas práticas em ambientes com proxy reverso.
+
+2️⃣ Captura do User-Agent
+
+O header User-Agent é capturado e armazenado para:
+
+Identificação de cliente (browser, mobile, script)
+
+Detecção de padrões suspeitos
+
+Auditoria de acessos
+
+3️⃣ Propagação segura entre Gateway e serviços
+
+O Gateway é responsável por enriquecer a requisição, adicionando headers internos:
+
+X-Client-IP
+
+X-Client-User-Agent
+
+Esses headers:
+
+Não são confiáveis externamente
+
+São usados apenas dentro do cluster
+
+Facilitam auditoria sem acoplamento ao Gateway
+
+4️⃣ Uso prático das informações
+
+As informações de IP e User-Agent são utilizadas em:
+
+Logs estruturados
+
+Eventos de auditoria (ex: login realizado)
+
+Integração com o audit-service (Micronaut)
+
+Exemplo de evento auditado:
+
+{
+  "user": "diogo",
+  "action": "LOGIN_SUCCESS",
+  "ip": "187.45.xxx.xxx",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+  "timestamp": "2026-02-02T21:34:10Z"
+}
+
+🔹 Avaliação (nível sênior)
+
+✔ Entendimento de infraestrutura real (Gateway, proxy, Kubernetes)
+✔ Não confiar em IP direto da requisição
+✔ Separação de responsabilidades (Gateway enriquece, serviço consome)
+✔ Preparação para auditoria, segurança e compliance
+✔ Arquitetura preparada para investigação de incidentes
+
 🗄️ ETAPA EXTRA (AVANÇADA) — FLYWAY (VERSIONAMENTO DE BANCO)
 
 📅 Inserida entre ETAPA 3 e ETAPA 4
