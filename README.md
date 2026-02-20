@@ -1275,3 +1275,8 @@ Este fornece endpoints operacionais como /actuator/health que responde com UP/DO
 - /actuator/metrics - que traz informacoes como quantas requisições, tempo médio, erros, Status HTTP.
 Tambem possue o endpoint /actuator/info que tras informacoes gerais como versão, nome, build.
 
+Comandos:
+mvn spring-boot:run == executa aplicacao Spring Boot, otimo para executar varias isntancias de um servico
+
+Config Server: servidor de configuracao
+
